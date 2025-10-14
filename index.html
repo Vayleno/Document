@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,89 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vayleno Chat App</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f0f0f0; color: #333; }
-        h1 { text-align: center; color: #007bff; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        form { display: flex; flex-direction: column; }
-        input, button { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-        button { background: #007bff; color: white; cursor: pointer; }
-        button:hover { background: #0056b3; }
-        #chat-window { height: 300px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin: 20px 0; background: #fafafa; }
-        .message { margin: 5px 0; padding: 8px; border-radius: 4px; }
-        .message.user { background: #dcf8c6; }
-        .message.other { background: #fff; }
-        .message.announcement { background: #ffd700; font-weight: bold; }
-        #admin-panel, #user-warnings { display: none; margin-top: 20px; }
-        #user-list { list-style: none; padding: 0; }
-        #user-list li { margin: 10px 0; padding: 10px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; padding: 10px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333; min-height: 100vh;
+        }
+        .container { 
+            max-width: 800px; margin: 0 auto; 
+            background: white; padding: 20px; 
+            border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, button { 
+            width: 100%; padding: 12px; border: 2px solid #ddd; 
+            border-radius: 8px; font-size: 16px; transition: all 0.3s ease;
+        }
+        input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
+        button { 
+            background: linear-gradient(45deg, #667eea, #764ba2); 
+            color: white; border: none; cursor: pointer; font-weight: bold;
+            margin: 5px 0;
+        }
+        button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .error { color: #e74c3c; background: #f8d7da; padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { color: #27ae60; background: #d4edda; padding: 10px; border-radius: 5px; margin: 10px 0; }
         .hidden { display: none; }
+        #debug-info { background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; font-family: monospace; font-size: 12px; }
+        #chat-window { height: 400px; overflow-y: auto; border: 2px solid #ddd; padding: 15px; margin: 20px 0; background: #f8f9fa; border-radius: 10px; }
+        .message { margin: 10px 0; padding: 12px; border-radius: 10px; word-wrap: break-word; }
+        .message.user { background: linear-gradient(45deg, #a8edea, #fed6e3); margin-left: 20%; }
+        .message.other { background: white; margin-right: 20%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .message.announcement { background: linear-gradient(45deg, #ffd700, #ffed4e); font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Vayleno Chat App</h1>
+        <h1>🎭 Vayleno Chat App</h1>
         
-        <!-- Login/Signup Section -->
-        <div id="auth-section">
-            <form id="signup-form">
-                <input type="email" id="signup-email" placeholder="Email" required>
-                <input type="password" id="signup-password" placeholder="Password" required>
-                <button type="submit">Sign Up</button>
-            </form>
-            <form id="login-form">
-                <input type="email" id="login-email" placeholder="Email" required>
-                <input type="password" id="login-password" placeholder="Password" required>
-                <button type="submit">Log In</button>
-            </form>
+        <!-- Debug Info -->
+        <div id="debug-info">
+            <strong>Debug Mode:</strong> Check browser console (F12) for detailed errors
         </div>
         
-        <!-- Chat Section (hidden until logged in) -->
+        <!-- Authentication Section -->
+        <div id="auth-section">
+            <div id="signup-form-container">
+                <h2>Create Account</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label for="signup-email">Email Address:</label>
+                        <input type="email" id="signup-email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-username">Choose Username:</label>
+                        <input type="text" id="signup-username" placeholder="e.g., CoolGamer123" required minlength="3" maxlength="20">
+                        <div id="username-status"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password:</label>
+                        <input type="password" id="signup-password" placeholder="Minimum 6 characters" required minlength="6">
+                    </div>
+                    <button type="submit" id="signup-btn" disabled>Create Account</button>
+                    <div id="signup-error" class="error hidden"></div>
+                </form>
+            </div>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <p>Already have an account? <button type="button" id="switch-to-login">Log In</button></p>
+            </div>
+            
+            <div id="login-form-container" class="hidden">
+                <h2>Log In</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address:</label>
+                        <input type="email" id="login-email" placeholder="your@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit">Log In</button>
+                    <div id="login-error" class="error hidden"></div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Chat Section -->
         <div id="chat-section" class="hidden">
+            <div style="text-align: center;">
+                <h2>Welcome, <span id="current-username"></span>!</h2>
+                <button id="logout">Log Out</button>
+            </div>
             <div id="chat-window"></div>
             <form id="chat-form">
-                <input type="text" id="message-input" placeholder="Type a message..." required>
+                <input type="text" id="message-input" placeholder="Type your message..." required>
                 <button type="submit">Send</button>
             </form>
-            <button id="logout">Log Out</button>
-            <div id="user-warnings"></div> <!-- Shows warnings for the user -->
+            <div id="user-warnings"></div>
         </div>
         
-        <!-- Admin Panel (hidden unless owner) -->
-        <div id="admin-panel">
-            <h2>Admin Panel</h2>
+        <!-- Admin Panel -->
+        <div id="admin-panel" class="hidden">
+            <h2>🔧 Admin Panel</h2>
             <form id="announce-form">
-                <input type="text" id="announce-input" placeholder="Announce public message..." required>
+                <input type="text" id="announce-input" placeholder="Announcement...">
                 <button type="submit">Announce</button>
             </form>
-            <h3>User List</h3>
+            <button id="load-users">Load Users</button>
             <ul id="user-list"></ul>
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js"></script>
+    <!-- Firebase SDK v12.4.0 Modular -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification } from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js';
+        import { getFirestore, collection, addDoc, setDoc, doc, getDocs, query, where, orderBy, onSnapshot, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js';
 
-    <script>
-        // Replace with your Firebase config
+        // 🔥 REPLACE THIS WITH YOUR ACTUAL FIREBASE CONFIG
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
+            apiKey: "YOUR_API_KEY_HERE",
             authDomain: "YOUR_PROJECT.firebaseapp.com",
             projectId: "YOUR_PROJECT_ID",
             storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
+            messagingSenderId: "123456789",
             appId: "YOUR_APP_ID"
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        const ownerEmail = 'your@email.com'; // Replace with your owner email
+        const OWNER_EMAIL = 'your-email@gmail.com'; // 🔥 REPLACE WITH YOUR EMAIL
 
-        // Elements
+        // DOM Elements
         const authSection = document.getElementById('auth-section');
         const chatSection = document.getElementById('chat-section');
         const adminPanel = document.getElementById('admin-panel');
@@ -97,161 +154,298 @@
         const chatForm = document.getElementById('chat-form');
         const announceForm = document.getElementById('announce-form');
         const messageInput = document.getElementById('message-input');
-        const announceInput = document.getElementById('announce-input');
+        const usernameInput = document.getElementById('signup-username');
+        const usernameStatus = document.getElementById('username-status');
+        const signupBtn = document.getElementById('signup-btn');
+        const currentUsername = document.getElementById('current-username');
         const chatWindow = document.getElementById('chat-window');
         const userList = document.getElementById('user-list');
+        const loadUsersBtn = document.getElementById('load-users');
         const userWarnings = document.getElementById('user-warnings');
+        const switchToLogin = document.getElementById('switch-to-login');
         const logoutBtn = document.getElementById('logout');
+        const announceInput = document.getElementById('announce-input');
 
-        // Listen for auth state changes
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                authSection.classList.add('hidden');
-                chatSection.classList.remove('hidden');
-                if (!user.emailVerified) {
-                    alert('Please verify your email before chatting.');
-                    chatForm.style.display = 'none'; // Disable chat until verified
+        // Debug logging
+        console.log('🔥 Firebase initialized:', { app, auth, db });
+        window.firebaseDebug = { app, auth, db }; // For browser console debugging
+
+        // Form switching
+        switchToLogin.addEventListener('click', () => {
+            document.getElementById('signup-form-container').classList.add('hidden');
+            document.getElementById('login-form-container').classList.remove('hidden');
+        });
+
+        // Username validation
+        usernameInput.addEventListener('input', async () => {
+            const username = usernameInput.value.trim();
+            usernameStatus.classList.add('hidden');
+            
+            if (username.length < 3 || username.length > 20) {
+                usernameStatus.textContent = 'Username must be 3-20 characters';
+                usernameStatus.classList.remove('hidden');
+                usernameStatus.classList.add('error');
+                signupBtn.disabled = true;
+                return;
+            }
+
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                usernameStatus.textContent = 'Username can only contain letters, numbers, and underscores';
+                usernameStatus.classList.remove('hidden');
+                usernameStatus.classList.add('error');
+                signupBtn.disabled = true;
+                return;
+            }
+            
+            try {
+                const q = query(collection(db, 'usernames'), where('name', '==', username));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    usernameStatus.textContent = '✅ Username available!';
+                    usernameStatus.classList.remove('hidden');
+                    usernameStatus.classList.add('success');
+                    signupBtn.disabled = false;
                 } else {
-                    chatForm.style.display = 'flex';
+                    usernameStatus.textContent = '❌ Username taken!';
+                    usernameStatus.classList.remove('hidden');
+                    usernameStatus.classList.add('error');
+                    signupBtn.disabled = true;
                 }
-                loadChat();
-                loadWarnings(user.uid);
-                if (user.email === ownerEmail) {
-                    adminPanel.style.display = 'block';
-                    loadUsers();
-                }
-            } else {
-                authSection.classList.remove('hidden');
-                chatSection.classList.add('hidden');
-                adminPanel.style.display = 'none';
+            } catch (error) {
+                console.error('Username check error:', error);
+                usernameStatus.textContent = 'Error checking username';
+                usernameStatus.classList.remove('hidden');
+                usernameStatus.classList.add('error');
             }
         });
 
         // Sign Up
-        signupForm.addEventListener('submit', e => {
+        signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    userCredential.user.sendEmailVerification();
-                    alert('Verification email sent. Please check your inbox.');
-                    // Create user doc
-                    db.collection('users').doc(userCredential.user.uid).set({
-                        email: email,
-                        banned: false,
-                        deleted: false,
-                        warnings: []
-                    });
-                })
-                .catch(error => alert(error.message));
+            const username = usernameInput.value.trim();
+            
+            const errorDiv = document.getElementById('signup-error');
+            errorDiv.classList.add('hidden');
+
+            try {
+                console.log('Creating user with:', { email, username });
+                
+                // Check username availability again
+                const q = query(collection(db, 'usernames'), where('name', '==', username));
+                const usernameSnap = await getDocs(q);
+                if (!usernameSnap.empty) {
+                    throw new Error('Username already taken!');
+                }
+
+                // Create user
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                console.log('User created:', user.uid);
+                
+                // Send verification email
+                await sendEmailVerification(user);
+                
+                // Create user document
+                await setDoc(doc(db, 'users', user.uid), {
+                    email: email,
+                    username: username,
+                    banned: false,
+                    deleted: false,
+                    warnings: [],
+                    joinedAt: serverTimestamp()
+                });
+
+                // Reserve username
+                await addDoc(collection(db, 'usernames'), {
+                    name: username,
+                    uid: user.uid,
+                    createdAt: serverTimestamp()
+                });
+
+                alert('Account created! Check your email to verify. Then log in.');
+                switchToLogin.click(); // Switch to login form
+                
+            } catch (error) {
+                console.error('Signup error:', error);
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                errorDiv.classList.add('error');
+            }
         });
 
-        // Log In
-        loginForm.addEventListener('submit', e => {
+        // Login
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(error => alert(error.message));
+            
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.classList.add('hidden');
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error('Login error:', error);
+                errorDiv.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                errorDiv.classList.add('error');
+            }
         });
 
-        // Log Out
-        logoutBtn.addEventListener('click', () => auth.signOut());
+        // Auth State Listener
+        onAuthStateChanged(auth, async (user) => {
+            console.log('Auth state changed:', user ? user.uid : 'Logged out');
+            
+            if (user) {
+                if (!user.emailVerified) {
+                    alert('Please verify your email first! Check your inbox.');
+                    await signOut(auth);
+                    return;
+                }
 
-        // Send Message
-        chatForm.addEventListener('submit', e => {
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (!userDoc.exists()) {
+                    alert('User data not found. Please sign up again.');
+                    await signOut(auth);
+                    return;
+                }
+
+                const userData = userDoc.data();
+                if (userData.banned || userData.deleted) {
+                    alert('Your account is suspended.');
+                    await signOut(auth);
+                    return;
+                }
+
+                currentUsername.textContent = userData.username;
+                authSection.classList.add('hidden');
+                chatSection.classList.remove('hidden');
+                
+                if (user.email === OWNER_EMAIL) {
+                    adminPanel.classList.remove('hidden');
+                }
+
+                loadChat();
+                loadWarnings(user.uid);
+            } else {
+                authSection.classList.remove('hidden');
+                chatSection.classList.add('hidden');
+                adminPanel.classList.add('hidden');
+            }
+        });
+
+        // Chat functionality
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const msg = messageInput.value;
-            db.collection('messages').add({
-                text: msg,
-                user: auth.currentUser.email,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                isAnnouncement: false
-            });
-            messageInput.value = '';
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            try {
+                await addDoc(collection(db, 'messages'), {
+                    text: message,
+                    username: currentUsername.textContent,
+                    uid: auth.currentUser.uid,
+                    timestamp: serverTimestamp(),
+                    isAnnouncement: false
+                });
+                messageInput.value = '';
+            } catch (error) {
+                console.error('Message send error:', error);
+                alert('Failed to send message: ' + error.message);
+            }
         });
 
-        // Announce (Admin)
-        announceForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const msg = announceInput.value;
-            db.collection('messages').add({
-                text: msg,
-                user: 'Admin Announcement',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                isAnnouncement: true
-            });
-            announceInput.value = '';
-        });
-
-        // Load Real-Time Chat
         function loadChat() {
-            db.collection('messages').orderBy('timestamp').onSnapshot(snapshot => {
+            const q = query(collection(db, 'messages'), orderBy('timestamp'));
+            onSnapshot(q, (snapshot) => {
                 chatWindow.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const msg = doc.data();
-                    const msgDiv = document.createElement('div');
-                    msgDiv.classList.add('message');
-                    if (msg.user === auth.currentUser.email) msgDiv.classList.add('user');
-                    else msgDiv.classList.add('other');
-                    if (msg.isAnnouncement) msgDiv.classList.add('announcement');
-                    msgDiv.textContent = `${msg.user}: ${msg.text}`;
-                    chatWindow.appendChild(msgDiv);
+                snapshot.forEach((docSnap) => {
+                    const data = docSnap.data();
+                    const div = document.createElement('div');
+                    div.className = `message ${data.username === currentUsername.textContent ? 'user' : 'other'} ${data.isAnnouncement ? 'announcement' : ''}`;
+                    div.innerHTML = `<strong>${data.username}:</strong> ${data.text}`;
+                    chatWindow.appendChild(div);
                 });
                 chatWindow.scrollTop = chatWindow.scrollHeight;
             });
         }
 
-        // Load User Warnings
-        function loadWarnings(uid) {
-            db.collection('users').doc(uid).onSnapshot(doc => {
-                const data = doc.data();
-                if (data.warnings && data.warnings.length > 0) {
-                    userWarnings.innerHTML = '<h3>Your Warnings:</h3><ul>' + data.warnings.map(w => `<li>${w}</li>`).join('') + '</ul>';
-                    userWarnings.style.display = 'block';
-                }
-            });
+        // Load Warnings
+        async function loadWarnings(uid) {
+            const userDoc = await getDoc(doc(db, 'users', uid));
+            const warnings = userDoc.data().warnings || [];
+            if (warnings.length > 0) {
+                userWarnings.innerHTML = '<h3>Your Warnings:</h3><ul>' + warnings.map(w => `<li>${w}</li>`).join('') + '</ul>';
+            }
         }
 
+        // Logout
+        logoutBtn.addEventListener('click', () => signOut(auth));
+
+        // Admin announcement
+        announceForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = announceInput.value.trim();
+            if (!message) return;
+            try {
+                await addDoc(collection(db, 'messages'), {
+                    text: message,
+                    username: 'ADMIN',
+                    uid: 'admin',
+                    timestamp: serverTimestamp(),
+                    isAnnouncement: true
+                });
+                announceInput.value = '';
+            } catch (error) {
+                console.error('Announcement error:', error);
+            }
+        });
+
         // Load Users for Admin
-        function loadUsers() {
-            db.collection('users').onSnapshot(snapshot => {
+        loadUsersBtn.addEventListener('click', async () => {
+            try {
+                const snapshot = await getDocs(collection(db, 'users'));
                 userList.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const userData = doc.data();
-                    if (userData.deleted) return; // Hide deleted
+                snapshot.forEach((docSnap) => {
+                    const userData = docSnap.data();
+                    if (userData.deleted) return;
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        ${userData.email} 
-                        <button onclick="banUser('${doc.id}')">Ban</button>
-                        <button onclick="warnUser('${doc.id}')">Warn</button>
-                        <button onclick="terminateUser('${doc.id}')">Terminate</button>
+                        ${userData.username} (${userData.email})
+                        <button onclick="warnUser('${docSnap.id}')">Warn</button>
+                        <button onclick="banUser('${docSnap.id}')">Ban</button>
+                        <button onclick="terminateUser('${docSnap.id}')">Terminate</button>
                     `;
                     userList.appendChild(li);
                 });
-            });
-        }
+            } catch (error) {
+                console.error('Load users error:', error);
+            }
+        });
 
         // Admin Actions
-        window.banUser = uid => {
-            db.collection('users').doc(uid).update({ banned: true });
-            alert('User banned.');
+        window.banUser = async (uid) => {
+            await updateDoc(doc(db, 'users', uid), { banned: true });
+            alert('User banned');
         };
 
-        window.warnUser = uid => {
-            const warning = prompt('Enter warning message:');
+        window.warnUser = async (uid) => {
+            const warning = prompt('Warning message:');
             if (warning) {
-                db.collection('users').doc(uid).update({
-                    warnings: firebase.firestore.FieldValue.arrayUnion(warning)
+                await updateDoc(doc(db, 'users', uid), {
+                    warnings: arrayUnion(warning)
                 });
-                alert('Warning sent.');
+                alert('Warning added');
             }
         };
 
-        window.terminateUser = uid => {
-            db.collection('users').doc(uid).update({ banned: true, deleted: true });
-            alert('User terminated (banned and marked deleted).');
+        window.terminateUser = async (uid) => {
+            await updateDoc(doc(db, 'users', uid), { deleted: true, banned: true });
+            alert('User terminated');
         };
     </script>
 </body>
